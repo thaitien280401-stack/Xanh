@@ -1,0 +1,74 @@
+<div class="max-w-5xl mx-auto">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Vocabulary</h1>
+      <p class="text-gray-500 mt-1">Browse and study words by topic</p>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/vocabulary/import">
+      <mat-icon>add</mat-icon> Import Words
+    </a>
+  </div>
+
+  <!-- Topic Chips -->
+  <div class="flex gap-2 flex-wrap mb-6">
+    @for (topic of topics(); track topic.id) {
+      <button
+        class="px-4 py-2 rounded-full text-sm font-medium border-2 transition-all"
+        [class]="selectedTopicId() === topic.id
+          ? 'border-green-500 bg-green-50 text-green-700'
+          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'"
+        (click)="selectTopic(topic.id)"
+      >
+        {{ topic.name }}
+        <span class="ml-1 text-xs opacity-70">({{ topic.vocabularyCount }})</span>
+      </button>
+    }
+  </div>
+
+  <!-- Search -->
+  <mat-form-field appearance="outline" class="w-full mb-6">
+    <mat-label>Search words...</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [ngModel]="searchQuery()" (ngModelChange)="onSearch($event)" placeholder="e.g. algorithm">
+  </mat-form-field>
+
+  <!-- Vocabulary Grid -->
+  @if (loading()) {
+    <div class="flex justify-center py-12 text-gray-400">Loading...</div>
+  } @else if (vocabPage()?.content?.length === 0) {
+    <div class="text-center py-12 text-gray-400">No vocabulary found for this topic.</div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      @for (v of vocabPage()?.content ?? []; track v.id) {
+        <mat-card class="rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <mat-card-content class="p-5">
+            <div class="flex items-start justify-between mb-2">
+              <h3 class="text-lg font-bold text-gray-800">{{ v.word }}</h3>
+              <span class="text-xs font-medium px-2 py-0.5 rounded-full" [class]="difficultyClass(v.difficulty)">
+                {{ v.difficulty }}
+              </span>
+            </div>
+            @if (v.partOfSpeech) {
+              <p class="text-xs text-gray-400 italic mb-2">{{ v.partOfSpeech }}</p>
+            }
+            <p class="text-sm text-gray-600 line-clamp-3">{{ v.definition }}</p>
+            @if (v.exampleSentence) {
+              <p class="text-xs text-gray-400 mt-2 italic line-clamp-2">"{{ v.exampleSentence }}"</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    @if (vocabPage() && vocabPage()!.totalElements > 20) {
+      <mat-paginator
+        [length]="vocabPage()!.totalElements"
+        [pageSize]="20"
+        [pageIndex]="currentPage()"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    }
+  }
+</div>

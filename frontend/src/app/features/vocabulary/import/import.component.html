@@ -1,0 +1,80 @@
+<div class="max-w-2xl mx-auto">
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Import Words</h1>
+    <p class="text-gray-500 mt-1">Fetch vocabulary from the Free Dictionary API</p>
+  </div>
+
+  <mat-card class="rounded-2xl shadow-sm mb-6">
+    <mat-card-content class="p-6 space-y-5">
+
+      <!-- Topic Selector -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Import into topic</mat-label>
+        <mat-select [ngModel]="selectedTopicId()" (ngModelChange)="selectedTopicId.set($event)">
+          @for (t of topics(); track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Word Search -->
+      <div class="flex gap-3">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Enter a word</mat-label>
+          <input matInput [ngModel]="wordInput()" (ngModelChange)="wordInput.set($event)"
+                 placeholder="e.g. serendipity" (keyup.enter)="search()">
+        </mat-form-field>
+        <button mat-flat-button color="primary" class="h-14 px-6 mt-[2px]"
+                [disabled]="!wordInput().trim() || searching()" (click)="search()">
+          @if (searching()) {
+            <mat-icon class="animate-spin">refresh</mat-icon>
+          } @else {
+            <mat-icon>search</mat-icon>
+          }
+          Search
+        </button>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Results -->
+  @if (preview().length > 0) {
+    <div class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700">Results for "{{ wordInput() }}"</h2>
+      @for (entry of preview(); track entry.word + entry.definition) {
+        <mat-card class="rounded-xl shadow-sm">
+          <mat-card-content class="p-5">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="font-bold text-gray-800">{{ entry.word }}</h3>
+                  @if (entry.partOfSpeech) {
+                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{{ entry.partOfSpeech }}</span>
+                  }
+                </div>
+                <p class="text-sm text-gray-600">{{ entry.definition }}</p>
+                @if (entry.exampleSentence) {
+                  <p class="text-xs text-gray-400 italic mt-1">"{{ entry.exampleSentence }}"</p>
+                }
+              </div>
+              <button
+                mat-flat-button color="primary"
+                class="flex-shrink-0"
+                [disabled]="importing() || importedWords().has(entry.word)"
+                (click)="importWord(entry.word)"
+              >
+                @if (importedWords().has(entry.word)) {
+                  <ng-container><mat-icon>check</mat-icon> Imported</ng-container>
+                } @else {
+                  <ng-container><mat-icon>add</mat-icon> Import</ng-container>
+                }
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,79 @@
+<div class="max-w-6xl mx-auto">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+      <p class="text-gray-500 mt-1">Track your learning progress</p>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/pomodoro"
+       class="bg-green-600 hover:bg-green-700 rounded-lg px-6">
+      <mat-icon class="mr-2">timer</mat-icon>
+      Start Pomodoro
+    </a>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="flex justify-center py-16">
+      <mat-spinner diameter="48" color="primary"></mat-spinner>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage()) {
+    <div class="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 mb-6">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (!loading() && stats()) {
+    <!-- Stat Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+      @for (card of statCards(); track card.label) {
+        <mat-card class="rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <mat-card-content class="p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-sm text-gray-500 mb-1">{{ card.label }}</p>
+                <p class="text-2xl font-bold text-gray-800">{{ card.value }}</p>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center {{ card.bg }}">
+                <mat-icon class="{{ card.color }}">{{ card.icon }}</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <!-- Mastery Breakdown -->
+    <mat-card class="rounded-xl shadow-sm">
+      <mat-card-header class="p-6 pb-0">
+        <mat-card-title class="text-lg font-semibold text-gray-800">Mastery Breakdown</mat-card-title>
+        <mat-card-subtitle>Your vocabulary mastery levels</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="p-6">
+        @if (getMasteryEntries().length === 0) {
+          <p class="text-gray-400 text-center py-4">No vocabulary data yet. Start studying to see your progress!</p>
+        } @else {
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @for (entry of getMasteryEntries(); track entry.key) {
+              <div class="rounded-xl p-4 text-center {{ masteryColors[entry.key] ?? 'bg-gray-100 text-gray-700' }}">
+                <p class="text-2xl font-bold">{{ entry.value }}</p>
+                <p class="text-sm font-medium mt-1">{{ entry.key }}</p>
+                <div class="mt-2">
+                  <mat-progress-bar
+                    mode="determinate"
+                    [value]="getMasteryPercent(entry.value)"
+                    class="rounded-full"
+                  ></mat-progress-bar>
+                  <p class="text-xs mt-1">{{ getMasteryPercent(entry.value) }}%</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

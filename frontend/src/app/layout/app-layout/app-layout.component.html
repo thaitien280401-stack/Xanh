@@ -1,0 +1,83 @@
+<div class="flex h-screen bg-gray-50">
+  <!-- Sidebar -->
+  <aside
+    class="flex flex-col bg-white shadow-lg transition-all duration-300 z-10"
+    [class.w-64]="sidebarOpen()"
+    [class.w-16]="!sidebarOpen()"
+  >
+    <!-- Sidebar Header -->
+    <div class="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+      @if (sidebarOpen()) {
+        <span class="text-xl font-bold text-green-700 whitespace-nowrap">Xanh Vocab</span>
+      }
+      <button mat-icon-button (click)="toggleSidebar()" class="ml-auto text-gray-500 hover:text-green-700">
+        <mat-icon>{{ sidebarOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 py-4 overflow-hidden">
+      <mat-nav-list>
+        @for (item of navItems; track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="bg-green-50 text-green-700"
+            class="rounded-lg mx-2 mb-1 transition-colors duration-150 hover:bg-green-50"
+            [matTooltip]="!sidebarOpen() ? item.label : ''"
+            matTooltipPosition="right"
+          >
+            <mat-icon matListItemIcon class="text-gray-500" [class.text-green-700]="true">{{ item.icon }}</mat-icon>
+            @if (sidebarOpen()) {
+              <span matListItemTitle class="font-medium">{{ item.label }}</span>
+            }
+          </a>
+        }
+      </mat-nav-list>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="px-4 py-4 border-t border-gray-100">
+      @if (sidebarOpen()) {
+        <p class="text-xs text-gray-400 text-center">Xanh Vocab v1.0</p>
+      }
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="flex flex-col flex-1 overflow-hidden">
+    <!-- Top Navbar -->
+    <mat-toolbar class="bg-white border-b border-gray-200 shadow-sm px-6" style="min-height: 64px;">
+      <span class="text-lg font-semibold text-gray-800 flex-1">Xanh Vocab</span>
+
+      <!-- User Info -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-bold"
+          >
+            {{ getUserInitials() }}
+          </div>
+          <span class="text-sm font-medium text-gray-700 hidden sm:inline">
+            {{ currentUser()?.username }}
+          </span>
+        </div>
+
+        <button
+          mat-stroked-button
+          color="warn"
+          (click)="logout()"
+          class="text-sm"
+        >
+          <mat-icon class="text-sm mr-1">logout</mat-icon>
+          Logout
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <!-- Content -->
+    <main class="flex-1 overflow-auto p-6">
+      <router-outlet />
+    </main>
+  </div>
+</div>

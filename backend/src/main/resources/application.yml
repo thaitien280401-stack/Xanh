@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: xanh-vocabulary-app
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/xanh_vocab}
+    username: ${SPRING_DATASOURCE_USERNAME:xanh}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: xanh-app-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.xanh.vocabulary.event"
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:fallback-secret-key-change-in-production-must-be-256-bits}
+    access-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+  cors:
+    allowed-origins: ${FRONTEND_URL:http://localhost:4200}
+  external-api:
+    vocab-base-url: ${EXTERNAL_VOCAB_API_BASE_URL:https://api.dictionaryapi.dev/api/v2/entries/en}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  group-configs:
+    - group: auth
+      paths-to-match: /api/v1/auth/**
+    - group: vocabulary
+      paths-to-match: /api/v1/vocabularies/**, /api/v1/topics/**
+    - group: pomodoro
+      paths-to-match: /api/v1/pomodoro/**
+    - group: quiz
+      paths-to-match: /api/v1/quizzes/**
+    - group: leaderboard
+      paths-to-match: /api/v1/leaderboard/**
+
+logging:
+  level:
+    com.xanh: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN

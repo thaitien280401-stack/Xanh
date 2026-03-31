@@ -1,0 +1,139 @@
+<div class="max-w-2xl mx-auto">
+  @if (loading()) {
+    <div class="flex justify-center py-16">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else {
+    <div class="flex flex-col items-center gap-6">
+
+      <!-- Session Info -->
+      <div class="text-center">
+        <h1 class="text-2xl font-bold text-gray-800">{{ session()?.topicName }}</h1>
+        <p class="text-gray-500 mt-1">
+          {{ session()?.durationMinutes }}-minute session
+        </p>
+      </div>
+
+      <!-- Circular Timer -->
+      <div class="relative flex items-center justify-center">
+        <svg width="200" height="200" class="-rotate-90">
+          <!-- Background circle -->
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#e5e7eb" stroke-width="10" />
+          <!-- Progress circle -->
+          <circle
+            cx="100" cy="100" r="80"
+            fill="none"
+            stroke="#16a34a"
+            stroke-width="10"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="circumference"
+            [attr.stroke-dashoffset]="strokeDashoffset"
+            class="transition-all duration-1000"
+          />
+        </svg>
+        <div class="absolute flex flex-col items-center">
+          <span class="text-4xl font-bold text-gray-800 font-mono">{{ timerDisplay }}</span>
+          <span class="text-sm text-gray-500 mt-1">{{ timerRunning() ? 'remaining' : 'done!' }}</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full">
+        <mat-progress-bar mode="determinate" [value]="progressValue" color="primary" class="rounded-full"></mat-progress-bar>
+        <div class="flex justify-between text-xs text-gray-400 mt-1">
+          <span>{{ vocabulary().length > 0 ? currentIndex() + 1 : 0 }} / {{ vocabulary().length }} words</span>
+          <span>{{ progressValue.toFixed(0) }}% elapsed</span>
+        </div>
+      </div>
+
+      <!-- Vocabulary Flip Card -->
+      @if (currentWord) {
+        <div
+          class="w-full cursor-pointer perspective-1000"
+          style="perspective: 1000px; min-height: 200px;"
+          (click)="flipCard()"
+        >
+          <div
+            class="relative w-full h-48 transition-transform duration-500"
+            style="transform-style: preserve-3d;"
+            [style.transform]="flipped() ? 'rotateY(180deg)' : 'rotateY(0deg)'"
+          >
+            <!-- Front: word -->
+            <mat-card
+              class="absolute inset-0 rounded-xl shadow-md flex flex-col items-center justify-center"
+              style="backface-visibility: hidden;"
+            >
+              <mat-card-content class="text-center p-6">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2">Word</p>
+                <p class="text-3xl font-bold text-gray-800">{{ currentWord.word }}</p>
+                @if (currentWord.pronunciation) {
+                  <p class="text-sm text-gray-500 mt-2 italic">/{{ currentWord.pronunciation }}/</p>
+                }
+                <p class="text-xs text-gray-400 mt-4">Click to reveal definition</p>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Back: definition + example -->
+            <mat-card
+              class="absolute inset-0 rounded-xl shadow-md flex flex-col items-center justify-center bg-green-50"
+              style="backface-visibility: hidden; transform: rotateY(180deg);"
+            >
+              <mat-card-content class="text-center p-6">
+                <p class="text-xs text-green-600 uppercase tracking-wider mb-2">Definition</p>
+                <p class="text-lg font-semibold text-gray-800">{{ currentWord.definition }}</p>
+                @if (currentWord.exampleSentence) {
+                  <p class="text-sm text-gray-500 mt-3 italic">"{{ currentWord.exampleSentence }}"</p>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+
+        <button mat-stroked-button (click)="nextCard()" class="mt-2">
+          <mat-icon class="mr-1">skip_next</mat-icon>
+          Next Card
+        </button>
+      } @else {
+        <mat-card class="w-full rounded-xl">
+          <mat-card-content class="text-center p-8 text-gray-400">
+            No vocabulary loaded for this topic.
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Action Buttons -->
+      <div class="flex gap-4 mt-4 w-full max-w-sm">
+        <button
+          mat-stroked-button
+          color="warn"
+          class="flex-1 h-12"
+          (click)="abandon()"
+          [disabled]="abandoning() || completing()"
+        >
+          @if (abandoning()) {
+            <mat-spinner diameter="18" class="inline-block mr-1"></mat-spinner>
+          } @else {
+            <mat-icon class="mr-1">close</mat-icon>
+          }
+          Abandon
+        </button>
+
+        <button
+          mat-flat-button
+          color="primary"
+          class="flex-1 h-12 bg-green-600 hover:bg-green-700"
+          (click)="complete()"
+          [disabled]="completing() || abandoning()"
+        >
+          @if (completing()) {
+            <mat-spinner diameter="18" class="inline-block mr-1"></mat-spinner>
+          } @else {
+            <mat-icon class="mr-1">check_circle</mat-icon>
+          }
+          Complete
+        </button>
+      </div>
+
+    </div>
+  }
+</div>

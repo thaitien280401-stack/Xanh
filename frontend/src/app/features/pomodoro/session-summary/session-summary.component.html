@@ -1,0 +1,37 @@
+<div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+  <div class="max-w-md w-full text-center">
+    <div class="bg-white rounded-2xl shadow-lg p-10">
+      <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <mat-icon class="text-green-600 !text-4xl">check_circle</mat-icon>
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Session Complete!</h1>
+      <p class="text-gray-500 mb-8">Great work on your Pomodoro session</p>
+
+      @if (session(); as s) {
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="bg-green-50 rounded-xl p-4">
+            <div class="text-3xl font-bold text-green-700">{{ s.wordsStudied }}</div>
+            <div class="text-sm text-gray-500 mt-1">Words Studied</div>
+          </div>
+          <div class="bg-blue-50 rounded-xl p-4">
+            <div class="text-3xl font-bold text-blue-700">{{ s.durationMinutes }}m</div>
+            <div class="text-sm text-gray-500 mt-1">Time Spent</div>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mb-8">Topic: <span class="font-medium text-gray-700">{{ s.topicName }}</span></p>
+      }
+
+      <div class="flex flex-col gap-3">
+        <button mat-raised-button color="primary" class="w-full" (click)="goToQuiz()">
+          <mat-icon>quiz</mat-icon>
+          Take a Quiz on this Topic
+        </button>
+        <button mat-stroked-button class="w-full" (click)="startNewSession()">
+          <mat-icon>timer</mat-icon>
+          Start New Session
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

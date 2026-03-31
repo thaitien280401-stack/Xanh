@@ -1,0 +1,99 @@
+<div class="max-w-2xl mx-auto">
+
+  @if (!quiz()) {
+    <div class="flex justify-center py-16">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else {
+    <!-- Header -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-medium text-gray-600">
+          Question {{ currentIndex() + 1 }} of {{ quiz()!.totalQuestions }}
+        </span>
+        <span class="text-sm text-gray-500">{{ quiz()!.topicName }}</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="progress()" color="primary"></mat-progress-bar>
+    </div>
+
+    @if (currentQuestion(); as question) {
+      <mat-card class="rounded-2xl shadow-sm">
+        <mat-card-content class="p-8">
+
+          <!-- Question Text -->
+          <p class="text-xl font-semibold text-gray-800 mb-8 text-center leading-relaxed">
+            {{ question.questionText }}
+          </p>
+
+          <!-- Multiple Choice -->
+          @if (quiz()!.quizType === 'MULTIPLE_CHOICE') {
+            <div class="space-y-3">
+              @for (opt of question.options; track opt) {
+                <button
+                  class="w-full text-left p-4 rounded-xl border-2 transition-all font-medium"
+                  [class]="selectedOption() === opt
+                    ? 'border-green-500 bg-green-50 text-green-800'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
+                  (click)="selectOption(opt)"
+                >
+                  {{ opt }}
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Fill in the Blank -->
+          @if (quiz()!.quizType === 'FILL_BLANK') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Your answer</mat-label>
+              <input matInput [ngModel]="fillAnswer()" (ngModelChange)="fillAnswer.set($event)"
+                     placeholder="Type the word..." (keyup.enter)="next()">
+            </mat-form-field>
+          }
+
+          <!-- True / False -->
+          @if (quiz()!.quizType === 'TRUE_FALSE') {
+            <div class="flex gap-4 justify-center">
+              <button
+                mat-flat-button class="h-16 w-32 text-lg"
+                [color]="selectedOption() === 'true' ? 'primary' : ''"
+                [class]="selectedOption() === 'true' ? '' : 'border border-gray-200'"
+                (click)="selectOption('true')"
+              >
+                <mat-icon class="mr-1">thumb_up</mat-icon> True
+              </button>
+              <button
+                mat-flat-button class="h-16 w-32 text-lg"
+                [color]="selectedOption() === 'false' ? 'warn' : ''"
+                [class]="selectedOption() === 'false' ? '' : 'border border-gray-200'"
+                (click)="selectOption('false')"
+              >
+                <mat-icon class="mr-1">thumb_down</mat-icon> False
+              </button>
+            </div>
+          }
+
+          <!-- Next / Submit -->
+          <div class="mt-8 flex justify-end">
+            <button
+              mat-flat-button color="primary"
+              class="h-11 px-8"
+              [disabled]="submitting() || (quiz()!.quizType !== 'FILL_BLANK' && !selectedOption())"
+              (click)="next()"
+            >
+              @if (submitting()) {
+                <mat-spinner diameter="18" class="inline mr-2"></mat-spinner>
+                Submitting...
+              } @else if (currentIndex() + 1 < quiz()!.totalQuestions) {
+                <ng-container>Next <mat-icon iconPositionEnd>arrow_forward</mat-icon></ng-container>
+              } @else {
+                <ng-container>Submit <mat-icon iconPositionEnd>check</mat-icon></ng-container>
+              }
+            </button>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>

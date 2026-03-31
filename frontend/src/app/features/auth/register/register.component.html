@@ -1,0 +1,84 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 px-4">
+  <mat-card class="w-full max-w-md shadow-xl rounded-2xl">
+    <mat-card-content class="p-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-2xl mb-4">
+          <mat-icon class="text-white" style="font-size: 2rem;">person_add</mat-icon>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800">Create Account</h1>
+        <p class="text-gray-500 mt-1">Join Xanh Vocab today</p>
+      </div>
+
+      <!-- Error Alert -->
+      @if (errorMessage()) {
+        <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
+          <mat-icon class="text-red-500 text-base">error_outline</mat-icon>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" placeholder="johndoe" autocomplete="username" />
+          <mat-icon matPrefix class="text-gray-400 mr-2">person</mat-icon>
+          @if (form.get('username')?.invalid && form.get('username')?.touched) {
+            <mat-error>Username must be at least 3 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
+          <mat-icon matPrefix class="text-gray-400 mr-2">email</mat-icon>
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <mat-error>Please enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="new-password"
+          />
+          <mat-icon matPrefix class="text-gray-400 mr-2">lock</mat-icon>
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+            <mat-icon class="text-gray-400">{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <mat-error>Password must be at least 6 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="w-full h-12 text-base font-semibold rounded-lg bg-green-600 hover:bg-green-700 mt-2"
+          [disabled]="loading() || form.invalid"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+            Creating account...
+          } @else {
+            Create Account
+          }
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <div class="mt-6 text-center text-sm text-gray-500">
+        Already have an account?
+        <a routerLink="/auth/login" class="text-green-600 font-semibold hover:text-green-700 ml-1">
+          Sign in
+        </a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
