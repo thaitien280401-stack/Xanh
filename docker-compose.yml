@@ -80,7 +80,7 @@ services:
       JWT_ACCESS_EXPIRATION_MS: ${JWT_ACCESS_EXPIRATION_MS:-900000}
       JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS:-604800000}
       EXTERNAL_VOCAB_API_BASE_URL: ${EXTERNAL_VOCAB_API_BASE_URL:-https://api.dictionaryapi.dev/api/v2/entries/en}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost,http://localhost:4200}
 
   # ─── Frontend ─────────────────────────────────────────────────
   frontend:
