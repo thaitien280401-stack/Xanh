@@ -36,3 +36,17 @@ export interface CreateTopicRequest {
   description?: string;
   externalApiRef?: string;
 }
+
+export interface AiSyncRequest {
+  topicName: string;
+  wordCount: number;
+}
+
+export interface AiSyncResponse {
+  topicId: string;
+  topicName: string;
+  totalGenerated: number;
+  saved: number;
+  skippedDuplicates: number;
+  processingTimeMs: number;
+}

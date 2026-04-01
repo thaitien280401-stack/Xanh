@@ -1,0 +1,21 @@
+# Build output
+backend/target/
+frontend/dist/
+frontend/.angular/cache/
+
+# Node
+frontend/node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env secrets
+.env

@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TopicService } from '../../../core/services/topic.service';
+import { LoadingService } from '../../../core/services/loading.service';
 import { Topic, TopicPage, TopicStatus } from '../../../core/models/topic.model';
 
 @Component({
@@ -26,11 +27,12 @@ import { Topic, TopicPage, TopicStatus } from '../../../core/models/topic.model'
   styleUrl: './topic-grid.component.scss',
 })
 export class TopicGridComponent implements OnInit {
-  private topicService = inject(TopicService);
-  private route        = inject(ActivatedRoute);
-  private router       = inject(Router);
-  private fb           = inject(FormBuilder);
-  private snackBar     = inject(MatSnackBar);
+  private topicService   = inject(TopicService);
+  private loadingService = inject(LoadingService);
+  private route          = inject(ActivatedRoute);
+  private router         = inject(Router);
+  private fb             = inject(FormBuilder);
+  private snackBar       = inject(MatSnackBar);
 
   readonly PAGE_SIZE = 18;
 
@@ -49,8 +51,13 @@ export class TopicGridComponent implements OnInit {
   submitting    = signal(false);
   syncing       = signal(false);
 
-  /** Keywords to send to the AI sync endpoint (editable via the sync input) */
+  /** Keywords to send to the pomodoro-sync endpoint */
   syncKeywords  = signal<string>('');
+
+  /** Topic name for the high-volume AI sync */
+  aiTopicName   = signal<string>('');
+  aiWordCount   = signal<number>(200);
+  aiSyncing     = signal<boolean>(false);
 
   createForm = this.fb.group({
     name:        ['', [Validators.required, Validators.maxLength(100)]],
@@ -153,6 +160,42 @@ export class TopicGridComponent implements OnInit {
           err?.error?.message ?? 'Sync failed. Please try again.',
           'Close',
           { duration: 4000 }
+        );
+      },
+    });
+  }
+
+  // ── High-Volume AI Sync ────────────────────────────────────────
+  /**
+   * Calls POST /api/v1/topics/sync-ai with a topic name + word count.
+   * Uses LoadingService for cross-component loading state.
+   * The HTTP call is wrapped in a 90 s timeout by TopicService.
+   */
+  onSyncAi(): void {
+    const topicName = this.aiTopicName().trim();
+    if (!topicName) {
+      this.snackBar.open('Enter a topic name to run AI sync.', 'Close', { duration: 3000 });
+      return;
+    }
+    this.aiSyncing.set(true);
+    this.loadingService.show(`Generating ${this.aiWordCount()} words for "${topicName}"…`);
+
+    this.topicService.syncAi(topicName, this.aiWordCount()).subscribe({
+      next: res => {
+        this.aiSyncing.set(false);
+        this.loadingService.hide();
+        this.aiTopicName.set('');
+        const msg = `AI sync complete — ${res.saved} saved, ${res.skippedDuplicates} duplicates skipped (${res.processingTimeMs} ms)`;
+        this.snackBar.open(msg, 'Close', { duration: 6000 });
+        this.loadTopics();
+      },
+      error: err => {
+        this.aiSyncing.set(false);
+        this.loadingService.hide();
+        this.snackBar.open(
+          err?.message ?? err?.error?.message ?? 'AI sync failed. Please try again.',
+          'Close',
+          { duration: 5000 }
         );
       },
     });

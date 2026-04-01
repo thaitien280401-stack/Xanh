@@ -67,6 +67,49 @@
     </div>
   </div>
 
+  <!-- ── AI High-Volume Sync Panel ───────────────────────────────── -->
+  <div class="sync-panel sync-panel--ai">
+    <div class="sync-panel__label">
+      <mat-icon>auto_awesome</mat-icon>
+      <span>AI High-Volume Sync</span>
+      <span class="sync-hint">Generate up to 400 words per topic in one batch</span>
+    </div>
+    <div class="sync-panel__row">
+      <input
+        class="sync-input"
+        type="text"
+        placeholder="Topic name (e.g. Machine Learning)"
+        [ngModel]="aiTopicName()"
+        (ngModelChange)="aiTopicName.set($event)"
+        [disabled]="aiSyncing()"
+      />
+      <input
+        class="sync-input sync-input--count"
+        type="number"
+        min="1"
+        max="400"
+        placeholder="Words (1-400)"
+        [ngModel]="aiWordCount()"
+        (ngModelChange)="aiWordCount.set(+$event)"
+        [disabled]="aiSyncing()"
+      />
+      <button
+        mat-flat-button
+        class="sync-btn sync-btn--ai"
+        [disabled]="aiSyncing() || !aiTopicName().trim()"
+        (click)="onSyncAi()"
+      >
+        @if (aiSyncing()) {
+          <mat-spinner diameter="18"></mat-spinner>
+          Generating...
+        } @else {
+          <mat-icon>bolt</mat-icon>
+          AI Sync
+        }
+      </button>
+    </div>
+  </div>
+
   <!-- ── Create Topic Form ─────────────────────────────────────── -->
   @if (showForm()) {
     <div class="create-panel" [class.create-panel--pomodoro]="pomodoroMode()">

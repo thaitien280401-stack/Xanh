@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { timeout, catchError } from 'rxjs/operators';
+import { throwError, TimeoutError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Topic, TopicPage, TopicStatus, CreateTopicRequest, PomodoroSyncRequest, PomodoroSyncResponse } from '../models/topic.model';
+import { Topic, TopicPage, TopicStatus, CreateTopicRequest, PomodoroSyncRequest, PomodoroSyncResponse, AiSyncRequest, AiSyncResponse } from '../models/topic.model';
 
 @Injectable({ providedIn: 'root' })
 export class TopicService {
@@ -39,5 +41,18 @@ export class TopicService {
   pomodoroSync(keywords: string[]): Observable<PomodoroSyncResponse> {
     const body: PomodoroSyncRequest = { keywords };
     return this.http.post<PomodoroSyncResponse>(`${this.apiUrl}/pomodoro-sync`, body);
+  }
+
+  syncAi(topicName: string, wordCount = 200): Observable<AiSyncResponse> {
+    const body: AiSyncRequest = { topicName, wordCount };
+    return this.http.post<AiSyncResponse>(`${this.apiUrl}/sync-ai`, body).pipe(
+      timeout(90_000),
+      catchError(err => {
+        if (err instanceof TimeoutError) {
+          return throwError(() => new Error('AI sync timed out after 90 seconds. Please try again.'));
+        }
+        return throwError(() => err);
+      })
+    );
   }
 }
