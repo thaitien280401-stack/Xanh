@@ -1,20 +1,86 @@
 <div class="topic-grid-page">
 
-  <!-- Header -->
+  <!-- ── Header ───────────────────────────────────────────────── -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Topics</h1>
+      <h1 class="page-title">
+        @if (pomodoroMode()) {
+          <mat-icon class="title-icon pomodoro-icon">timer</mat-icon>
+          Pomodoro Mode — Topics
+        } @else {
+          Topics
+        }
+      </h1>
       <p class="page-subtitle">Browse all vocabulary topics</p>
     </div>
-    <a mat-flat-button color="primary" routerLink="/vocabulary">
-      <mat-icon>library_books</mat-icon> Browse Words
-    </a>
+
+    <div class="header-actions">
+      <button mat-stroked-button class="create-btn" (click)="toggleForm()">
+        <mat-icon>{{ showForm() ? 'close' : 'add' }}</mat-icon>
+        {{ showForm() ? 'Cancel' : 'New Topic' }}
+      </button>
+      <a mat-flat-button color="primary" routerLink="/vocabulary">
+        <mat-icon>library_books</mat-icon> Browse Words
+      </a>
+    </div>
   </div>
 
-  <!-- Tabs -->
+  <!-- ── Pomodoro banner ───────────────────────────────────────── -->
+  @if (pomodoroMode()) {
+    <div class="pomodoro-banner">
+      <mat-icon>info_outline</mat-icon>
+      You arrived from Pomodoro Setup. Create a new topic below, then return to start your session.
+      <a routerLink="/pomodoro" class="banner-link">← Back to Pomodoro</a>
+    </div>
+  }
+
+  <!-- ── Create Topic Form ─────────────────────────────────────── -->
+  @if (showForm()) {
+    <div class="create-panel" [class.create-panel--pomodoro]="pomodoroMode()">
+      <h3 class="create-panel__title">
+        <mat-icon>add_circle</mat-icon>
+        Create New Topic{{ pomodoroMode() ? ' (Pomodoro Mode)' : '' }}
+      </h3>
+
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="create-form">
+        <mat-form-field appearance="outline" class="create-form__field">
+          <mat-label>Topic name *</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Business English" maxlength="100">
+          @if (createForm.get('name')?.hasError('required') && createForm.get('name')?.touched) {
+            <mat-error>Name is required</mat-error>
+          }
+          @if (createForm.get('name')?.hasError('maxlength')) {
+            <mat-error>Max 100 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="create-form__field">
+          <mat-label>Description (optional)</mat-label>
+          <textarea matInput formControlName="description" rows="2"
+                    placeholder="Short description of this topic"></textarea>
+        </mat-form-field>
+
+        <div class="create-form__actions">
+          <button mat-stroked-button type="button" (click)="toggleForm()">Cancel</button>
+          <button mat-flat-button type="submit"
+                  class="submit-btn"
+                  [class.submit-btn--pomodoro]="pomodoroMode()"
+                  [disabled]="submitting()">
+            @if (submitting()) {
+              <mat-spinner diameter="18"></mat-spinner> Creating...
+            } @else {
+              <mat-icon>save</mat-icon> Create Topic
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- ── Tabs ──────────────────────────────────────────────────── -->
   <mat-tab-group animationDuration="200ms" (selectedIndexChange)="onTabChange($event)">
 
-    <!-- ── Active Topics ──────────────────────────────────────── -->
+    <!-- Active Topics -->
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">bolt</mat-icon>
@@ -24,9 +90,7 @@
       <ng-template matTabContent>
         <div class="tab-content">
           @if (loading()) {
-            <div class="spinner-wrap">
-              <mat-spinner diameter="48" />
-            </div>
+            <div class="spinner-wrap"><mat-spinner diameter="48"></mat-spinner></div>
           } @else if (topics().length === 0) {
             <div class="empty-state">
               <mat-icon>topic</mat-icon>
@@ -35,10 +99,10 @@
           } @else {
             <div class="topic-grid">
               @for (topic of topics(); track trackById($index, topic)) {
-                <a class="topic-card active-card" [routerLink]="['/vocabulary']" [queryParams]="{ topicId: topic.id }">
-                  <div class="card-icon">
-                    <mat-icon>folder_open</mat-icon>
-                  </div>
+                <a class="topic-card active-card"
+                   [routerLink]="['/vocabulary']"
+                   [queryParams]="{ topicId: topic.id }">
+                  <div class="card-icon"><mat-icon>folder_open</mat-icon></div>
                   <h3 class="card-name">{{ topic.name }}</h3>
                   <p class="card-desc">{{ topic.description || 'No description' }}</p>
                   <span class="card-count">
@@ -64,7 +128,7 @@
       </ng-template>
     </mat-tab>
 
-    <!-- ── Done Topics ────────────────────────────────────────── -->
+    <!-- Done Topics -->
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">check_circle</mat-icon>
@@ -74,9 +138,7 @@
       <ng-template matTabContent>
         <div class="tab-content">
           @if (loading()) {
-            <div class="spinner-wrap">
-              <mat-spinner diameter="48" />
-            </div>
+            <div class="spinner-wrap"><mat-spinner diameter="48"></mat-spinner></div>
           } @else if (topics().length === 0) {
             <div class="empty-state">
               <mat-icon>task_alt</mat-icon>
@@ -85,10 +147,10 @@
           } @else {
             <div class="topic-grid">
               @for (topic of topics(); track trackById($index, topic)) {
-                <a class="topic-card done-card" [routerLink]="['/vocabulary']" [queryParams]="{ topicId: topic.id }">
-                  <div class="card-icon done-icon">
-                    <mat-icon>check_circle</mat-icon>
-                  </div>
+                <a class="topic-card done-card"
+                   [routerLink]="['/vocabulary']"
+                   [queryParams]="{ topicId: topic.id }">
+                  <div class="card-icon done-icon"><mat-icon>check_circle</mat-icon></div>
                   <h3 class="card-name">{{ topic.name }}</h3>
                   <p class="card-desc">{{ topic.description || 'No description' }}</p>
                   <span class="card-count">

@@ -25,6 +25,101 @@
   }
 }
 
+/* ── Header actions ───────────────────────────────────────── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title-icon {
+  font-size: 1.75rem;
+  height: 1.75rem;
+  width: 1.75rem;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.pomodoro-icon { color: #f97316; }
+
+.create-btn { border-radius: 8px !important; }
+
+/* ── Pomodoro banner ──────────────────────────────────────── */
+.pomodoro-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-left: 4px solid #f97316;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #c2410c;
+  margin-bottom: 1.25rem;
+
+  mat-icon { color: #f97316; flex-shrink: 0; }
+}
+
+.banner-link {
+  margin-left: auto;
+  color: #ea580c;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  &:hover { text-decoration: underline; }
+}
+
+/* ── Create Topic Panel ───────────────────────────────────── */
+.create-panel {
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+
+  &--pomodoro {
+    background: #fff7ed;
+    border-color: #fed7aa;
+  }
+}
+
+.create-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1rem;
+
+  mat-icon { color: #16a34a; }
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &__field { width: 100%; }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+}
+
+.submit-btn {
+  background: #16a34a !important;
+  color: #fff !important;
+
+  &--pomodoro {
+    background: linear-gradient(135deg, #f97316, #ef4444) !important;
+  }
+}
+
 /* ── Tab content ──────────────────────────────────────────── */
 .tab-content {
   padding: 1.5rem 0;
