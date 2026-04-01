@@ -10,8 +10,9 @@ RUN npm run build -- --configuration production
 
 # ─── Stage 2: Nginx ──────────────────────────────────────────
 FROM nginx:1.27-alpine
+# nginx.conf is a template — envsubst will expand ${DOMAIN} at container start
 COPY --from=builder /app/dist/frontend/browser /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
-EXPOSE 80
+EXPOSE 80 443
 CMD ["nginx", "-g", "daemon off;"]

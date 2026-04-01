@@ -90,6 +90,19 @@ jobs:
     environment: production
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Sync docker-compose.yml to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "/opt/xanh-vocab/"
+          strip_components: 0
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -97,7 +110,51 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd /opt/xanh-vocab
+
+            # Pull latest images from GHCR and restart all services
             docker compose pull
             docker compose up -d --remove-orphans
+
+            # Remove dangling images to reclaim disk space
             docker system prune -f
+
+            echo "✅ Deployment complete"
+
+      - name: Smoke test — health check
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            # Poll backend health for up to 120 s (24 attempts × 5 s each)
+            POLL_INTERVAL=5
+            MAX_ATTEMPTS=24
+            STATUS="missing"
+            for i in $(seq 1 $MAX_ATTEMPTS); do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' xanh_backend 2>/dev/null || echo "missing")
+              if [ "$STATUS" = "healthy" ]; then
+                echo "✅ Backend is healthy"
+                break
+              fi
+              echo "⏳ Waiting for backend... ($i/$MAX_ATTEMPTS) status=$STATUS"
+              sleep $POLL_INTERVAL
+            done
+
+            if [ "$STATUS" != "healthy" ]; then
+              echo "❌ Backend did not become healthy within $((MAX_ATTEMPTS * POLL_INTERVAL))s"
+              docker compose logs backend --tail=50
+              exit 1
+            fi
+
+            # Verify the frontend is reachable via the domain
+            DOMAIN=$(grep '^DOMAIN=' /opt/xanh-vocab/.env | cut -d= -f2 || true)
+            if [ -n "$DOMAIN" ] && [ "$DOMAIN" != "yourdomain.com" ]; then
+              HTTP_CODE=$(curl -sk -o /dev/null -w "%{http_code}" "https://$DOMAIN/" || echo "000")
+              echo "🌐 https://$DOMAIN/ returned HTTP $HTTP_CODE"
+            fi
+
+            echo "🎉 Smoke test passed"
