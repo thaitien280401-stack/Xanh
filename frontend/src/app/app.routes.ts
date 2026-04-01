@@ -57,6 +57,10 @@ export const routes: Routes = [
           {
             path: 'import',
             loadComponent: () => import('./features/vocabulary/import/import.component').then(m => m.ImportComponent)
+          },
+          {
+            path: 'topics',
+            loadComponent: () => import('./features/vocabulary/topic-grid/topic-grid.component').then(m => m.TopicGridComponent)
           }
         ]
       },

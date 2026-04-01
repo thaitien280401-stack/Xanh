@@ -3,10 +3,13 @@ package com.xanh.vocabulary.service;
 import com.xanh.vocabulary.dto.request.CreateTopicRequest;
 import com.xanh.vocabulary.dto.response.TopicDto;
 import com.xanh.vocabulary.entity.Topic;
+import com.xanh.vocabulary.enums.TopicStatus;
 import com.xanh.vocabulary.repository.TopicRepository;
 import com.xanh.vocabulary.repository.VocabularyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,10 @@ public class TopicService {
                 .orElseThrow(() -> new EntityNotFoundException("Topic not found: " + id)));
     }
 
+    public Page<TopicDto> getPaged(TopicStatus status, Pageable pageable) {
+        return topicRepository.findByStatus(status, pageable).map(this::toDto);
+    }
+
     @Transactional
     public TopicDto create(CreateTopicRequest request) {
         if (topicRepository.existsByName(request.name())) {
@@ -42,11 +49,19 @@ public class TopicService {
         return toDto(topicRepository.save(topic));
     }
 
+    @Transactional
+    public TopicDto updateStatus(UUID id, TopicStatus status) {
+        Topic topic = topicRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Topic not found: " + id));
+        topic.setStatus(status);
+        return toDto(topicRepository.save(topic));
+    }
+
     private TopicDto toDto(Topic topic) {
-        int count = vocabularyRepository.findByTopicId(topic.getId()).size();
+        long count = vocabularyRepository.countByTopicId(topic.getId());
         return new TopicDto(
                 topic.getId(), topic.getName(), topic.getDescription(),
-                topic.getExternalApiRef(), count, topic.getCreatedAt()
+                topic.getExternalApiRef(), (int) count, topic.getStatus(), topic.getCreatedAt()
         );
     }
 }

@@ -1,5 +1,7 @@
 package com.xanh.vocabulary.dto.response;
 
+import com.xanh.vocabulary.enums.TopicStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -9,5 +11,6 @@ public record TopicDto(
         String description,
         String externalApiRef,
         int vocabularyCount,
+        TopicStatus status,
         LocalDateTime createdAt
 ) {}

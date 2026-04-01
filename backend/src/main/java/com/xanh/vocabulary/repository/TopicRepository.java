@@ -1,9 +1,13 @@
 package com.xanh.vocabulary.repository;
 
 import com.xanh.vocabulary.entity.Topic;
+import com.xanh.vocabulary.enums.TopicStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,4 +15,6 @@ import java.util.UUID;
 public interface TopicRepository extends JpaRepository<Topic, UUID> {
     Optional<Topic> findByName(String name);
     boolean existsByName(String name);
+    Page<Topic> findByStatus(TopicStatus status, Pageable pageable);
+    List<Topic> findByStatus(TopicStatus status);
 }

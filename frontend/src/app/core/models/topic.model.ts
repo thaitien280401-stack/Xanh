@@ -1,10 +1,23 @@
+export type TopicStatus = 'ACTIVE' | 'DONE';
+
 export interface Topic {
   id: string;
   name: string;
   description: string;
   externalApiRef: string;
   vocabularyCount: number;
+  status: TopicStatus;
   createdAt: string;
+}
+
+export interface TopicPage {
+  content: Topic[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
 }
 
 export interface CreateTopicRequest {

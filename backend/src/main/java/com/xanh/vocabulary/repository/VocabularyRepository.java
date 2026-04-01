@@ -16,6 +16,7 @@ public interface VocabularyRepository extends JpaRepository<Vocabulary, UUID> {
     List<Vocabulary> findByTopicId(UUID topicId);
     Page<Vocabulary> findByTopicId(UUID topicId, Pageable pageable);
     boolean existsByWordAndTopicId(String word, UUID topicId);
+    long countByTopicId(UUID topicId);
 
     @Query("SELECT v FROM Vocabulary v WHERE " +
            "LOWER(v.word) LIKE LOWER(CONCAT('%', :query, '%')) OR " +

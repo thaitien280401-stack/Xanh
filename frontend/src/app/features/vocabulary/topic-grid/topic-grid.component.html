@@ -1,0 +1,118 @@
+<div class="topic-grid-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Topics</h1>
+      <p class="page-subtitle">Browse all vocabulary topics</p>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/vocabulary">
+      <mat-icon>library_books</mat-icon> Browse Words
+    </a>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group animationDuration="200ms" (selectedIndexChange)="onTabChange($event)">
+
+    <!-- ── Active Topics ──────────────────────────────────────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">bolt</mat-icon>
+        Active Topics
+      </ng-template>
+
+      <ng-template matTabContent>
+        <div class="tab-content">
+          @if (loading()) {
+            <div class="spinner-wrap">
+              <mat-spinner diameter="48" />
+            </div>
+          } @else if (topics().length === 0) {
+            <div class="empty-state">
+              <mat-icon>topic</mat-icon>
+              <p>No active topics found.</p>
+            </div>
+          } @else {
+            <div class="topic-grid">
+              @for (topic of topics(); track trackById($index, topic)) {
+                <a class="topic-card active-card" [routerLink]="['/vocabulary']" [queryParams]="{ topicId: topic.id }">
+                  <div class="card-icon">
+                    <mat-icon>folder_open</mat-icon>
+                  </div>
+                  <h3 class="card-name">{{ topic.name }}</h3>
+                  <p class="card-desc">{{ topic.description || 'No description' }}</p>
+                  <span class="card-count">
+                    <mat-icon class="count-icon">auto_stories</mat-icon>
+                    {{ topic.vocabularyCount }} words
+                  </span>
+                </a>
+              }
+            </div>
+
+            @if (totalElements() > PAGE_SIZE) {
+              <mat-paginator
+                [length]="totalElements()"
+                [pageSize]="PAGE_SIZE"
+                [pageIndex]="currentPage()"
+                [hidePageSize]="true"
+                (page)="onPageChange($event)"
+                showFirstLastButtons>
+              </mat-paginator>
+            }
+          }
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- ── Done Topics ────────────────────────────────────────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">check_circle</mat-icon>
+        Done Topics
+      </ng-template>
+
+      <ng-template matTabContent>
+        <div class="tab-content">
+          @if (loading()) {
+            <div class="spinner-wrap">
+              <mat-spinner diameter="48" />
+            </div>
+          } @else if (topics().length === 0) {
+            <div class="empty-state">
+              <mat-icon>task_alt</mat-icon>
+              <p>No fully-charged topics yet.</p>
+            </div>
+          } @else {
+            <div class="topic-grid">
+              @for (topic of topics(); track trackById($index, topic)) {
+                <a class="topic-card done-card" [routerLink]="['/vocabulary']" [queryParams]="{ topicId: topic.id }">
+                  <div class="card-icon done-icon">
+                    <mat-icon>check_circle</mat-icon>
+                  </div>
+                  <h3 class="card-name">{{ topic.name }}</h3>
+                  <p class="card-desc">{{ topic.description || 'No description' }}</p>
+                  <span class="card-count">
+                    <mat-icon class="count-icon">auto_stories</mat-icon>
+                    {{ topic.vocabularyCount }} words
+                  </span>
+                </a>
+              }
+            </div>
+
+            @if (totalElements() > PAGE_SIZE) {
+              <mat-paginator
+                [length]="totalElements()"
+                [pageSize]="PAGE_SIZE"
+                [pageIndex]="currentPage()"
+                [hidePageSize]="true"
+                (page)="onPageChange($event)"
+                showFirstLastButtons>
+              </mat-paginator>
+            }
+          }
+        </div>
+      </ng-template>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>

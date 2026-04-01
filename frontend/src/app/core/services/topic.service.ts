@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Topic, CreateTopicRequest } from '../models/topic.model';
+import { Topic, TopicPage, TopicStatus, CreateTopicRequest } from '../models/topic.model';
 
 @Injectable({ providedIn: 'root' })
 export class TopicService {
@@ -18,8 +18,18 @@ export class TopicService {
     return this.http.get<Topic>(`${this.apiUrl}/${id}`);
   }
 
+  getPaged(status: TopicStatus = 'ACTIVE', page = 0, size = 18): Observable<TopicPage> {
+    return this.http.get<TopicPage>(`${this.apiUrl}/paged`, {
+      params: { status, page: page.toString(), size: size.toString() }
+    });
+  }
+
   create(request: CreateTopicRequest): Observable<Topic> {
     return this.http.post<Topic>(this.apiUrl, request);
+  }
+
+  updateStatus(id: string, status: TopicStatus): Observable<Topic> {
+    return this.http.patch<Topic>(`${this.apiUrl}/${id}/status`, null, { params: { status } });
   }
 
   searchExternal(query: string): Observable<any[]> {
