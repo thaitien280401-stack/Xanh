@@ -66,9 +66,7 @@ services:
 
   # ─── Backend ──────────────────────────────────────────────────
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ${BACKEND_IMAGE:-ghcr.io/thaitien280401-stack/xanh/xanh-backend}:${IMAGE_TAG:-latest}
     container_name: xanh_backend
     restart: unless-stopped
     depends_on:
@@ -76,8 +74,6 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
-    ports:
-      - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-xanh_vocab}
@@ -88,22 +84,60 @@ services:
       JWT_ACCESS_EXPIRATION_MS: ${JWT_ACCESS_EXPIRATION_MS:-900000}
       JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS:-604800000}
       EXTERNAL_VOCAB_API_BASE_URL: ${EXTERNAL_VOCAB_API_BASE_URL:-https://api.dictionaryapi.dev/api/v2/entries/en}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost,http://localhost:4200}
+      FRONTEND_URL: ${FRONTEND_URL:-https://localhost}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
-  # ─── Frontend ─────────────────────────────────────────────────
+  # ─── Frontend (Nginx + SSL) ───────────────────────────────────
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ${FRONTEND_IMAGE:-ghcr.io/thaitien280401-stack/xanh/xanh-frontend}:${IMAGE_TAG:-latest}
     container_name: xanh_frontend
     restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "80:80"
+      - "443:443"
+    environment:
+      # nginx.conf template uses ${DOMAIN} for server_name and SSL certificate paths
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - certbot_certs:/etc/letsencrypt:ro
+      - certbot_webroot:/var/www/certbot:ro
+
+  # ─── Certbot (Let's Encrypt auto-renewal) ────────────────────
+  certbot:
+    image: certbot/certbot:latest
+    container_name: xanh_certbot
+    restart: unless-stopped
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_webroot:/var/www/certbot
+      # Docker socket allows certbot to reload nginx after successful renewal
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # Renew certificates every 12 h and reload nginx so the new cert is picked up.
+    # Initial certificate issuance is done by scripts/init-letsencrypt.sh.
+    # The deploy-hook sends a reload signal to the nginx container; the `|| true`
+    # ensures a temporary nginx hiccup won't abort an otherwise successful renewal.
+    entrypoint: >
+      /bin/sh -c "
+        apk add --no-cache docker-cli 2>/dev/null || true;
+        trap exit TERM;
+        while :; do
+          certbot renew --webroot -w /var/www/certbot --quiet \
+            --deploy-hook 'docker exec xanh_frontend nginx -s reload || true';
+          sleep 12h & wait $${!};
+        done"
 
 volumes:
   postgres_data:
   zookeeper_data:
   zookeeper_log:
   kafka_data:
+  certbot_certs:
+  certbot_webroot:
