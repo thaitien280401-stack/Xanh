@@ -29,6 +29,12 @@ services:
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_log:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc -w 2 localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   # ─── Kafka ────────────────────────────────────────────────────
   kafka:
@@ -36,7 +42,8 @@ services:
     container_name: xanh_kafka
     restart: unless-stopped
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "9092:9092"
     environment:
@@ -52,9 +59,10 @@ services:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
       test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:29092", "--list"]
-      interval: 30s
+      interval: 15s
       timeout: 10s
-      retries: 5
+      retries: 8
+      start_period: 45s
 
   # ─── Backend ──────────────────────────────────────────────────
   backend:
