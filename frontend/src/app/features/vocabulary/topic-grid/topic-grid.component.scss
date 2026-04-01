@@ -70,6 +70,72 @@
   &:hover { text-decoration: underline; }
 }
 
+/* ── Pomodoro Sync Panel ──────────────────────────────────── */
+.sync-panel {
+  background: #f8faff;
+  border: 1.5px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 1rem;
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4338ca;
+    margin-bottom: 0.6rem;
+
+    mat-icon { font-size: 18px; height: 18px; width: 18px; }
+  }
+
+  &__row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}
+
+.sync-hint {
+  font-weight: 400;
+  color: #818cf8;
+  margin-left: 4px;
+}
+
+.sync-input {
+  flex: 1;
+  height: 38px;
+  padding: 0 0.75rem;
+  border: 1.5px solid #c7d2fe;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1e1b4b;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus { border-color: #6366f1; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.sync-btn {
+  height: 38px;
+  border-radius: 8px !important;
+  background: #4f46e5 !important;
+  color: #fff !important;
+  font-weight: 600;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover:not([disabled]) { background: #4338ca !important; }
+  &[disabled] { opacity: 0.5; }
+
+  mat-icon { font-size: 18px; height: 18px; width: 18px; }
+}
+
 /* ── Create Topic Panel ───────────────────────────────────── */
 .create-panel {
   background: #f9fafb;

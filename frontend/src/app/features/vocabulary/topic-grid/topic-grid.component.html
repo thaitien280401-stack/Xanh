@@ -34,6 +34,39 @@
     </div>
   }
 
+  <!-- ── Pomodoro Sync Panel ───────────────────────────────────── -->
+  <div class="sync-panel">
+    <div class="sync-panel__label">
+      <mat-icon>sync</mat-icon>
+      <span>AI Topic Sync</span>
+      <span class="sync-hint">Enter keywords separated by commas</span>
+    </div>
+    <div class="sync-panel__row">
+      <input
+        class="sync-input"
+        type="text"
+        placeholder="e.g. technology, business, science"
+        [ngModel]="syncKeywords()"
+        (ngModelChange)="syncKeywords.set($event)"
+        [disabled]="syncing()"
+      />
+      <button
+        mat-flat-button
+        class="sync-btn"
+        [disabled]="syncing() || !syncKeywords().trim()"
+        (click)="onPomodoroSync()"
+      >
+        @if (syncing()) {
+          <mat-spinner diameter="18"></mat-spinner>
+          Syncing...
+        } @else {
+          <mat-icon>cloud_sync</mat-icon>
+          Sync Topics
+        }
+      </button>
+    </div>
+  </div>
+
   <!-- ── Create Topic Form ─────────────────────────────────────── -->
   @if (showForm()) {
     <div class="create-panel" [class.create-panel--pomodoro]="pomodoroMode()">

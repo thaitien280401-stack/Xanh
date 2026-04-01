@@ -20,6 +20,17 @@ export interface TopicPage {
   last: boolean;
 }
 
+export interface PomodoroSyncRequest {
+  keywords: string[];
+}
+
+export interface PomodoroSyncResponse {
+  created: number;
+  updated: number;
+  wordsAdded: number;
+  topics: Topic[];
+}
+
 export interface CreateTopicRequest {
   name: string;
   description?: string;

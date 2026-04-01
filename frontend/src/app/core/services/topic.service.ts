@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Topic, TopicPage, TopicStatus, CreateTopicRequest } from '../models/topic.model';
+import { Topic, TopicPage, TopicStatus, CreateTopicRequest, PomodoroSyncRequest, PomodoroSyncResponse } from '../models/topic.model';
 
 @Injectable({ providedIn: 'root' })
 export class TopicService {
@@ -34,5 +34,10 @@ export class TopicService {
 
   searchExternal(query: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/external/search`, { params: { query } });
+  }
+
+  pomodoroSync(keywords: string[]): Observable<PomodoroSyncResponse> {
+    const body: PomodoroSyncRequest = { keywords };
+    return this.http.post<PomodoroSyncResponse>(`${this.apiUrl}/pomodoro-sync`, body);
   }
 }

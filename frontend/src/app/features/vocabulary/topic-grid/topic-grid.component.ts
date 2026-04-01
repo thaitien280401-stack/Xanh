@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +17,7 @@ import { Topic, TopicPage, TopicStatus } from '../../../core/models/topic.model'
   selector: 'app-topic-grid',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, ReactiveFormsModule,
+    CommonModule, RouterModule, ReactiveFormsModule, FormsModule,
     MatTabsModule, MatButtonModule, MatIconModule,
     MatPaginatorModule, MatProgressSpinnerModule,
     MatFormFieldModule, MatInputModule, MatSnackBarModule,
@@ -47,6 +47,10 @@ export class TopicGridComponent implements OnInit {
   pomodoroMode  = signal(false);
   showForm      = signal(false);
   submitting    = signal(false);
+  syncing       = signal(false);
+
+  /** Keywords to send to the AI sync endpoint (editable via the sync input) */
+  syncKeywords  = signal<string>('');
 
   createForm = this.fb.group({
     name:        ['', [Validators.required, Validators.maxLength(100)]],
@@ -114,6 +118,39 @@ export class TopicGridComponent implements OnInit {
         this.submitting.set(false);
         this.snackBar.open(
           err?.error?.message ?? 'Failed to create topic. Admin access required.',
+          'Close',
+          { duration: 4000 }
+        );
+      },
+    });
+  }
+
+  // ── Pomodoro Sync ──────────────────────────────────────────────
+  /**
+   * Calls POST /api/v1/topics/pomodoro-sync with the entered keywords.
+   * On success: shows a summary snackbar and refreshes the grid.
+   */
+  onPomodoroSync(): void {
+    const raw = this.syncKeywords().trim();
+    if (!raw) {
+      this.snackBar.open('Enter at least one keyword to sync.', 'Close', { duration: 3000 });
+      return;
+    }
+    const keywords = raw.split(',').map(k => k.trim()).filter(k => k.length > 0);
+
+    this.syncing.set(true);
+    this.topicService.pomodoroSync(keywords).subscribe({
+      next: res => {
+        this.syncing.set(false);
+        this.syncKeywords.set('');
+        const msg = `Sync complete — ${res.created} created, ${res.updated} updated, ${res.wordsAdded} words added.`;
+        this.snackBar.open(msg, 'Close', { duration: 5000 });
+        this.loadTopics(); // refresh 6×3 grid
+      },
+      error: err => {
+        this.syncing.set(false);
+        this.snackBar.open(
+          err?.error?.message ?? 'Sync failed. Please try again.',
           'Close',
           { duration: 4000 }
         );
