@@ -24,9 +24,9 @@ import java.util.concurrent.ScheduledFuture;
 @RequiredArgsConstructor
 public class TopicSchedulerService {
 
-    static final String KEY_INTERVAL_HOURS      = "INTERVAL_HOURS";
-    static final String KEY_MIN_VOCAB_THRESHOLD = "MIN_VOCAB_THRESHOLD";
-    static final String KEY_SCHEDULER_ENABLED   = "SCHEDULER_ENABLED";
+    public static final String KEY_INTERVAL_HOURS      = "INTERVAL_HOURS";
+    public static final String KEY_MIN_VOCAB_THRESHOLD = "MIN_VOCAB_THRESHOLD";
+    public static final String KEY_SCHEDULER_ENABLED   = "SCHEDULER_ENABLED";
 
     private final TopicRepository topicRepository;
     private final VocabularyRepository vocabularyRepository;
