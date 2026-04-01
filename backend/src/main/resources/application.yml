@@ -47,7 +47,7 @@ app:
     access-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
     refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
   cors:
-    allowed-origins: ${FRONTEND_URL:http://localhost:4200}
+    allowed-origins: ${FRONTEND_URL:http://localhost,http://localhost:4200}
   external-api:
     vocab-base-url: ${EXTERNAL_VOCAB_API_BASE_URL:https://api.dictionaryapi.dev/api/v2/entries/en}
 
